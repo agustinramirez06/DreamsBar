@@ -29,6 +29,9 @@ const CATEGORY_MAP = {
   'Infantil': 'page16'
 };
 
+// 🔧 CATEGORÍAS QUE NECESITAN AGRUPACIÓN POR TIPO
+const GROUPED_CATEGORIES = ['Hamburguesas', 'Vinos'];
+
 // ===== CARGAR DATOS DESDE GOOGLE SHEETS =====
 async function loadMenuFromSheets() {
   try {
@@ -131,6 +134,35 @@ function formatPrice(price) {
   return `$${price.toLocaleString('es-AR')}`;
 }
 
+// ===== DETECTAR TIPO DE ITEM (Simple, Doble, etc.) =====
+function detectItemType(nombre, descripcion) {
+  // Primero buscamos en el nombre (donde está el tipo en hamburguesas)
+  let busqueda = (nombre + ' ' + descripcion).toLowerCase();
+  
+  if (busqueda.includes('x1')) return 'Simple';
+  if (busqueda.includes('x2')) return 'Doble';
+  if (busqueda.includes('tinto')) return 'Tinto';
+  if (busqueda.includes('blanco')) return 'Blanco';
+
+  
+  return 'Otros';
+}
+
+// ===== AGRUPAR ITEMS POR TIPO =====
+function groupItemsByType(items) {
+  const groups = {};
+
+  items.forEach(item => {
+    const type = detectItemType(item.nombre, item.descripcion);
+    if (!groups[type]) {
+      groups[type] = [];
+    }
+    groups[type].push(item);
+  });
+
+  return groups;
+}
+
 // ===== DISEÑO ESPECIAL PARA BEBIDAS =====
 function renderBebidaSpecial(items) {
   const bebidas = {};
@@ -223,7 +255,53 @@ function renderEmpanadaSpecial(items) {
   return html;
 }
 
-// ===== CREAR ELEMENTO DE CATEGORÍA (SIN TÍTULO GLOBAL) =====
+// ===== RENDERIZAR ITEMS AGRUPADOS POR TIPO (Hamburguesas, Vinos, etc.) =====
+function renderGroupedItems(groupedByType) {
+  let html = '';
+
+  // Orden preferido de tipos
+  const typeOrder = ['Simple', 'Doble', 'Triple', 'Tinto', 'Blanco', 'Rosado', 'Espumante', 'Otros'];
+
+  const sortedTypes = Object.keys(groupedByType).sort((a, b) => {
+    const indexA = typeOrder.indexOf(a);
+    const indexB = typeOrder.indexOf(b);
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+  });
+
+  sortedTypes.forEach(type => {
+    const items = groupedByType[type];
+
+    html += `<div class="menu-subtype">`;
+    html += `<h3 class="subtype-title">${type}</h3>`;
+    html += `<ul class="menu-items">`;
+
+    items.forEach(item => {
+      // Extraer solo la descripción real (sin el tipo Simple/Doble)
+      let descReal = item.nombre;
+      const typeInName = detectItemType(item.nombre, '');
+      if (typeInName !== 'Otros') {
+        descReal = item.nombre.replace(new RegExp(typeInName, 'i'), '').trim();
+      }
+
+      html += `<li>`;
+      html += `<div class="item-content">`;
+      html += `<div class="item-name">${descReal}</div>`;
+      if (item.descripcion && item.descripcion.toLowerCase() !== type.toLowerCase()) {
+        html += `<div class="item-description">(${item.descripcion})</div>`;
+      }
+      html += `</div>`;
+      html += `<span class="item-price">${formatPrice(item.precio)}</span>`;
+      html += `</li>`;
+    });
+
+    html += `</ul>`;
+    html += `</div>`;
+  });
+
+  return html;
+}
+
+// ===== CREAR ELEMENTO DE CATEGORÍA (CON SOPORTE PARA AGRUPACIÓN) =====
 function createCategoryElement(categoryName, items) {
   // ✅ VALIDAR ITEMS VACÍOS
   if (!items || items.length === 0) {
@@ -253,11 +331,17 @@ function createCategoryElement(categoryName, items) {
 
   if (
     lowerName.includes('bebida') ||
-    lowerName.includes('vino') ||
     lowerName.includes('cerveza') ||
     lowerName.includes('trago')
   ) {
     categoryDiv.insertAdjacentHTML('beforeend', renderBebidaSpecial(items));
+    return categoryDiv;
+  }
+
+  // ✅ RENDERIZAR CON AGRUPACIÓN POR TIPO (Hamburguesas, Vinos)
+  if (GROUPED_CATEGORIES.some(cat => lowerName.includes(cat.toLowerCase()))) {
+    const groupedByType = groupItemsByType(items);
+    categoryDiv.insertAdjacentHTML('beforeend', renderGroupedItems(groupedByType));
     return categoryDiv;
   }
 

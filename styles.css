@@ -594,3 +594,23 @@ body {
     font-size: 0.9rem;
   }
 }
+
+
+/* ===== SUBSECCIONES POR TIPO (Simple, Doble, Tinto, Blanco, etc.) ===== */
+.menu-subtype {
+  margin-bottom: 2rem;
+  padding-left: 1.5rem;
+  border-left: 4px solid rgba(255, 215, 0, 0.4);
+}
+
+.subtype-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #ffd700;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.9;
+  font-style: italic;
+}
