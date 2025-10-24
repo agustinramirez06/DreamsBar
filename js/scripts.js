@@ -5,6 +5,27 @@ const totalPages = 16;
 // 🔧 URL DEL CSV
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvEfoAlfrXcSukJICzx9icJU9VWMQI4gHnAjNIV9Y28KtBCWo89XJabccW9b2NljJZRiWJ4cP0aAJh/pub?output=csv';
 
+const EMOJI_MAP = {
+  'Entradas': '🍟',
+  'Principales': '🍽️',
+  'Pastas': '🍝',
+  'Salsas': '🫕',
+  'Guarniciones': '🥗',
+  'Pizzas': '🍕',
+  'Empanadas': '🥟',
+  'Tartas': '🥧',
+  'Hamburguesas': '🍔',
+  'Sandwiches': '🥪',
+  'Postres': '🍰',
+  'Helados': '🍨',
+  'Bebida Sin Alcohol': '🥤',
+  'Alcohol': '🍾',
+  'Vinos': '🍷',
+  'Cervezas': '🍺',
+  'Tragos': '🍹',
+  'Menú Infantil': '👶'
+};
+
 // 🔧 MAPEO DE CATEGORÍAS A PÁGINAS (CENTRALIZADO)
 const CATEGORY_MAP = {
   'Entradas': 'page2',
@@ -17,7 +38,6 @@ const CATEGORY_MAP = {
   'Tartas': 'page8',
   'Hamburguesas': 'page9',
   'Sándwiches': 'page10',
-  'Sandwiches': 'page10',
   'Postres': 'page11',
   'Helados': 'page11',
   'Bebida Sin Alcohol': 'page12',
@@ -28,6 +48,12 @@ const CATEGORY_MAP = {
   'Menú Infantil': 'page16',
   'Infantil': 'page16'
 };
+
+function getEmojiForCategory(categoryName) {
+  return EMOJI_MAP[categoryName] || '🥪'; // Default emoji si no encuentra
+}
+
+
 
 // 🔧 CATEGORÍAS QUE NECESITAN AGRUPACIÓN POR TIPO
 const GROUPED_CATEGORIES = ['Hamburguesas', 'Vinos'];
@@ -442,7 +468,8 @@ async function updateMenuPages() {
       .map(g => g.name)
       .join(' / ');
 
-    mainTitle.textContent = `MENÚ — ${categoriesText}`;
+    const emoji = getEmojiForCategory(groups[0].name);
+    mainTitle.textContent = `${emoji}  ${categoriesText}`;
     wrapper.appendChild(mainTitle);
 
     // ===== AGREGAR CADA CATEGORÍA COMO SUBCATEGORÍA =====
@@ -473,7 +500,28 @@ function getExampleData() {
   };
 }
 
+
+
+
+
 // ===== NAVEGACIÓN =====
+// ===== FUNCIÓN PARA MOSTRAR/OCULTAR BOTONES E INDICADOR =====
+function toggleNavigationUI() {
+  const bottomNav = document.querySelector('.bottom-navigation');
+  const pageIndicator = document.getElementById('pageIndicator');
+  
+  if (currentPage === 1) {
+    // Ocultar en portada
+    if (bottomNav) bottomNav.style.display = 'none';
+    if (pageIndicator) pageIndicator.style.display = 'none';
+  } else {
+    // Mostrar en otras páginas
+    if (bottomNav) bottomNav.style.display = 'flex';
+    if (pageIndicator) pageIndicator.style.display = 'flex';
+  }
+}
+
+
 function createPageIndicators() {
   const indicator = document.getElementById('pageIndicator');
   for (let i = 1; i <= totalPages; i++) {
@@ -484,25 +532,10 @@ function createPageIndicators() {
   }
 }
 
+
 document.getElementById('nextPage').addEventListener('click', () => changePage(1));
 document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
 
-let touchStartX = 0;
-let touchEndX = 0;
-
-document.querySelector('.pages').addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-});
-
-document.querySelector('.pages').addEventListener('touchend', e => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-});
-
-function handleSwipe() {
-  if (touchEndX < touchStartX - 50) changePage(1);
-  if (touchEndX > touchStartX + 50) changePage(-1);
-}
 
 function changePage(direction) {
   const oldPage = document.getElementById(`page${currentPage}`);
@@ -519,6 +552,9 @@ function changePage(direction) {
   const newPage = document.getElementById(`page${currentPage}`);
   newPage.classList.add('active');
   updateIndicator();
+
+//ocultar o mostrar botones e indicador
+  toggleNavigationUI();
 }
 
 function goToPage(pageNum) {
@@ -539,6 +575,9 @@ function updateIndicator() {
   dots.forEach((dot, index) => {
     dot.classList.toggle('active', index === currentPage - 1);
   });
+
+//ocultar o mostrar botones e indicador
+  toggleNavigationUI(); 
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -546,6 +585,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const spinner = document.getElementById('loadingSpinner');
   createPageIndicators();
+
+  // Ocultar botones
+  toggleNavigationUI();
 
   await updateMenuPages();
 
