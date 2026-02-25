@@ -231,7 +231,7 @@ body {
   position: absolute;
   bottom: 20px; /* controla qué tan arriba o abajo están debajo del layout */
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -852,7 +852,9 @@ body {
 
 /* Botón CTA principal */
 .cta-button {
-  margin-top: 1rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  margin-top: -1rem;
   padding: 1.2rem 2.5rem;
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   color: #0a0a0a;
