@@ -19,7 +19,8 @@ body {
   display: grid;
   grid-template-rows: auto 1fr auto;
   grid-template-columns: 1fr;
-  min-height: 100vh;
+  min-height: 100vh; /* fallback: navegadores sin soporte de svh */
+  min-height: 100svh; /* iOS: alto VISIBLE real (sin la barra del navegador) — el menú entra y los puntitos no quedan debajo del pliegue */
   overflow-x: hidden;
 }
 
@@ -47,8 +48,8 @@ body {
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 215, 0, 0.2);
-  border-top-color: #ffd700;
+  border: 4px solid rgba(230, 57, 70, 0.3);
+  border-top-color: #e63946;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -64,9 +65,9 @@ body {
   z-index: 1000;
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+  border-bottom: 2px solid rgba(230, 57, 70, 0.35);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  padding: 0.8rem 1rem;
+  padding: 0.6rem 1rem; /* header más compacto: devuelve altura al modal */
 }
 
 .header-content {
@@ -90,14 +91,14 @@ body {
   width: 45px;
   height: 45px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.15));
+  filter: drop-shadow(0 2px 8px rgba(230, 57, 70, 0.2));
 }
 
 .logo-text {
   font-family: 'Playfair Display', serif;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #ffd700;
+  color: #e63946;
   letter-spacing: 2px;
   display: inline;
 }
@@ -117,9 +118,9 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 0.8rem;
-  background: rgba(255, 215, 0, 0.1);
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: rgba(230, 57, 70, 0.12);
+  color: #ff4d4d;
+  border: 1px solid rgba(230, 57, 70, 0.35);
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
@@ -129,10 +130,10 @@ body {
 }
 
 .contact-link:hover {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: #ffd700;
+  background: rgba(230, 57, 70, 0.22);
+  border-color: #ff6b5e;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.25);
 }
 
 .contact-link i {
@@ -147,11 +148,12 @@ body {
 
 /* ===== MAIN CONTENT ===== */
 .main-content {
+  position: relative; /* ancla para nav e indicador, fuera del árbol 3D */
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 1rem 0.5rem;
+  padding: 0.6rem 0.5rem 60px; /* restaurado: padding superior para que el menú no crezca más */
   overflow: hidden;
   flex: 1;
 }
@@ -163,19 +165,17 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
-  max-width: 1000px;
+  height: 85%; /* ocupa TODO el alto visible del main: sin anidado que achique (los botones están fuera) */
+  max-width: 900px; /* base segura: mobile lo pisa a 95% (media query) y PC a 900px (bloque desktop). Sin esto, ventanas anchas-bajas (teléfono rotado) caían en max-width: 100px (roto) */
   aspect-ratio: 16 / 9;
-  perspective: 2000px;
-  padding-bottom: 50px; /* espacio para botones */
 }
 
 .pages {
   position: relative;
   width: 100%;
-  height: 90%;
+  height: 100%;
   max-width: 900px;
-
+  perspective: 2000px; /* contexto 3D aislado: solo afecta al flip de páginas */
 }
 
 
@@ -208,6 +208,14 @@ body {
   transform: rotateY(180deg) scale(0.8);
 }
 
+/* Las páginas de la carta (2-16) reservan abajo espacio para los botones flotantes.
+   La portada (page1) no lo necesita: ahí los botones están ocultos.
+   La portada tampoco reserva padding inferior: su contenido está anclado arriba
+   (flex-start) y el aire sobrante deja el CTA por encima del footer flotante. */
+.page:not(#page1) {
+  padding-bottom: 6rem;
+}
+
 .page::-webkit-scrollbar {
   width: 8px;
 }
@@ -229,34 +237,41 @@ body {
 /* ===== BOTONES DE NAVEGACIÓN (DEBAJO DE LA CARTA) ===== */
 .bottom-navigation {
   position: absolute;
-  bottom: 20px; /* controla qué tan arriba o abajo están debajo del layout */
+  bottom: 40px; /* anclado al MAIN, fuera del contenedor 3D — posición aprobada */
   left: 50%;
-  transform: translateX(-50%) translateZ(0);
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 250%; /* espacio entre botones */
-  z-index: 100;
+  gap: 10rem; /* espacio entre botones (restaurado a versión aprobada) */
+  z-index: 1000;
 }
 
 .nav-btn {
   position: static; /* ya no absolute */
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 1.5rem;
   padding: 0.9rem 1.1rem;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  /* sin transform en la transición: el :active responde instantáneo en iOS */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.nav-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(255, 255, 255, 0.2);
+/* Hover SOLO con mouse real (evita el :hover "pegado" de iOS tras el tap) */
+@media (hover: hover) {
+  .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.2);
+  }
 }
 
 .nav-btn:active {
@@ -329,7 +344,7 @@ body {
 }
 
 .contact-info i {
-  color: #ffd700;
+  color: #ff4d4d;
   font-size: 1.2rem;
 }
 
@@ -355,7 +370,7 @@ body {
   text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 3px solid rgba(255, 215, 0, 0.8);
+  border-bottom: 3px solid rgba(230, 57, 70, 0.8);
   color: #fff;
   letter-spacing: 4px;
   text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
@@ -369,7 +384,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 1.2rem;
-  color: #ffd700;
+  color: #e63946;
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -385,7 +400,7 @@ body {
   transform: translateY(-50%);
   width: 5px;
   height: 80%;
-  background: linear-gradient(to bottom, #ffd700, #ff8c00);
+  background: linear-gradient(to bottom, #e63946, #a4161a);
   border-radius: 5px;
 }
 
@@ -409,9 +424,9 @@ body {
 
 .menu-items li:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-left-color: #ffd700;
+  border-left-color: #e63946;
   transform: translateX(5px);
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(230, 57, 70, 0.2);
 }
 
 .item-content {
@@ -438,7 +453,7 @@ body {
 
 .item-price {
   font-weight: 700;
-  color: #ffd700;
+  color: #ff4d4d;
   font-size: 1.1rem;
   min-width: 90px;
   text-align: right;
@@ -450,7 +465,7 @@ body {
 /* ===== INDICADOR DE PÁGINAS ===== */
 .page-indicator {
   position: absolute;
-  bottom: -10px;
+  bottom: 15px; /* justo debajo de los botones — posición aprobada */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -464,20 +479,47 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
-  cursor: pointer;
 }
 
 .page-dot.active {
-  background: #ffd700;
+  background: #ff4d4d;
   width: 30px;
   border-radius: 5px;
 }
 
-.footer-min {
+/* ===== ERROR DE CARGA DEL MENÚ (sin datos inventados) ===== */
+.menu-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  height: 100%;
   text-align: center;
-  padding: 1.2rem 0.8rem;
-  background: transparent;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e0e0e0;
+  font-size: 1rem;
+  padding: 2rem;
+}
+
+.menu-error-icon {
+  font-size: 2.5rem;
+}
+
+.menu-error-hint {
+  color: #999;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.footer-min {
+  position: fixed; /* flotante: NO consume la fila del grid → el modal de la portada usa todo el alto, igual que el menú */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; /* por encima del modal (z-index 10) para flotar sobre su borde inferior */
+  text-align: center;
+  margin-bottom: 1.5rem; /* separación desde el borde inferior (lo sube) — 24px */
+  padding: 0.6rem 0.8rem calc(0.6rem + env(safe-area-inset-bottom, 0px)); /* footer compacto: devuelve altura al modal */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -487,7 +529,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem; /* gap compacto: más espacio para el modal */
   max-width: 100%;
 }
 
@@ -512,21 +554,21 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: rgba(230, 57, 70, 0.15);
+  border: 1px solid rgba(230, 57, 70, 0.3);
   border-radius: 50%;
-  color: #ffd700;
+  color: #ff4d4d;
   font-size: 0.85rem;
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .social-icon:hover {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: #ffd700;
+  background: rgba(230, 57, 70, 0.25);
+  border-color: #ff6b5e;
   transform: translateY(-2px) scale(1.1);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
-  color: #ffed4e;
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+  color: #ff6b5e;
 }
 
 .social-icon:active {
@@ -554,7 +596,7 @@ body {
   }
 
   .main-content {
-    padding: 0.8rem 0.3rem;
+    padding: 0.6rem 0.3rem 60px; /* restaurado: padding superior en mobile */
     flex: 1;
   }
 
@@ -607,11 +649,12 @@ body {
   }
 
  .footer-min {
-    padding: 0.8rem 0.5rem;
+    margin-bottom: 1.5rem; /* más arriba también en mobile — 24px */
+    padding: 0.6rem 0.5rem calc(0.6rem + env(safe-area-inset-bottom, 0px)); /* compacto en mobile */
   }
 
   .footer-content {
-    gap: 0.6rem;
+    gap: 0.4rem;
   }
 
   .footer-text {
@@ -644,7 +687,7 @@ body {
 
 .empanada-subtitle {
   font-size: 0.9rem;
-  color: #ffd700;
+  color: #ff4d4d;
   margin-bottom: 0.6rem;
   font-weight: 600;
 }
@@ -678,9 +721,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.7rem 0.8rem;
-  background: rgba(255, 215, 0, 0.05);
+  background: rgba(230, 57, 70, 0.1);
   border-radius: 8px;
-  border-left: 3px solid #ffd700;
+  border-left: 3px solid #e63946;
 }
 
 .empanada-price-label {
@@ -691,7 +734,7 @@ body {
 
 .empanada-price-value {
   font-size: 0.95rem;
-  color: #ffd700;
+  color: #ff4d4d;
   font-weight: 700;
 }
 
@@ -710,24 +753,24 @@ body {
 
 .bebida-size {
   font-size: 0.75rem;
-  color: #ffd700;
-  background: rgba(255, 215, 0, 0.1);
+  color: #ff4d4d;
+  background: rgba(230, 57, 70, 0.15);
   padding: 0.25rem 0.6rem;
   border-radius: 15px;
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  border: 1px solid rgba(230, 57, 70, 0.3);
 }
 
 /* ===== SUBSECCIONES (Simple, Doble, Tinto, Blanco) ===== */
 .menu-subtype {
   margin-bottom: 1.2rem;
   padding-left: 1.2rem;
-  border-left: 3px solid rgba(255, 215, 0, 0.3);
+  border-left: 3px solid rgba(230, 57, 70, 0.4);
 }
 
 .subtype-title {
   font-weight: 600;
   font-size: 0.85rem;
-  color: #ffd700;
+  color: #ff4d4d;
   margin-bottom: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -742,12 +785,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Anclado arriba, NO centrado: si el contenido excede (footer flotante abajo),
+     el centrado flexbox cortaría el logo arriba. Con flex-start el logo nunca se corta
+     y el aire inferior separa el CTA del footer flotante. */
+  justify-content: flex-start;
   height: 100%;
   text-align: center;
   position: relative;
   overflow: hidden;
   gap: 1.5rem;
+  padding-top: 1.5rem;
 }
 
 /* Fondo con efecto "respira" sutil */
@@ -758,7 +805,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(230, 57, 70, 0.07) 0%, transparent 70%);
   animation: breathe 8s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
@@ -791,7 +838,7 @@ body {
 /* Logo con entrada elegante */
 .logo {
   width: 180px;
-  filter: drop-shadow(0 15px 40px rgba(255, 215, 0, 0.2));
+  filter: drop-shadow(0 15px 40px rgba(230, 57, 70, 0.25));
   animation: logoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   opacity: 0;
   transform: scale(0.8);
@@ -815,10 +862,10 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: 3rem;
   font-weight: 700;
-  color: #ffd700;
+  color: #e63946;
   letter-spacing: 4px;
   margin-bottom: 0.8rem;
-  text-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+  text-shadow: 0 4px 20px rgba(230, 57, 70, 0.3);
   line-height: 1.1;
 }
 
@@ -836,7 +883,7 @@ body {
 .cover-divider {
   width: 60px;
   height: 2px;
-  background: linear-gradient(to right, transparent, #ffd700, transparent);
+  background: linear-gradient(to right, transparent, #e63946, transparent);
   margin: 1.5rem 0;
   animation: expandLine 0.8s ease 0.6s forwards;
   opacity: 0;
@@ -856,7 +903,7 @@ body {
   touch-action: manipulation;
   margin-top: -1rem;
   padding: 1.2rem 2.5rem;
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  background: linear-gradient(135deg, #e63946 0%, #ff4d4d 100%);
   color: #0a0a0a;
   border: none;
   border-radius: 50px;
@@ -866,7 +913,7 @@ body {
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 8px 30px rgba(230, 57, 70, 0.35);
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -879,8 +926,8 @@ body {
 
 .cta-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(255, 215, 0, 0.5);
-  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+  box-shadow: 0 12px 40px rgba(230, 57, 70, 0.5);
+  background: linear-gradient(135deg, #ff4d4d 0%, #e63946 100%);
 }
 
 .cta-button:active {
@@ -922,12 +969,12 @@ body {
 }
 
 .cover-contact-item i {
-  color: #ffd700;
+  color: #ff4d4d;
   font-size: 1.1rem;
 }
 
 .cover-contact-item:hover {
-  color: #ffd700;
+  color: #ff6b5e;
   transform: translateY(-2px);
 }
 
@@ -951,7 +998,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #ffd700;
+  color: #ff4d4d;
   font-size: 0.85rem;
   animation: pulse-indicator 2s ease-in-out infinite;
   z-index: 2;
@@ -1010,7 +1057,7 @@ body {
     font-size: 0.95rem;
   }
 
-  .cover-footer {
+.cover-footer {
     bottom: 20px;
     gap: 1.5rem;
   }
@@ -1022,6 +1069,64 @@ body {
   .cover-indicator {
     bottom: 60px;
     font-size: 0.75rem;
+  }
+}
+
+/* ===== PC / DESKTOP (≥641px y alto ≥500px) =====
+   Bloque ADITIVO: solo aplica a pantallas ANCHAS Y ALTAS (PC).
+   El mobile portrait (max-width: 640px) y el teléfono rotado (alto < 500px)
+   NO reciben ninguna regla de este bloque.
+   Corrige el max-width: 100px del .menu-book, que solo rompía el desktop. */
+@media (min-width: 641px) and (min-height: 500px) {
+  .main-content {
+    padding: 1rem 1.5rem 60px;
+  }
+
+  .menu-book {
+    height: 100%; /* en PC ocupa todo el alto del main (la base 85% era para mobile) */
+    max-width: 900px; /* corrige el max-width: 100px de la regla base (bug de desktop) */
+  }
+
+  .page {
+    padding: 1.25rem;
+  }
+
+  /* Portada en PC: anclada arriba (igual que mobile).
+     NO justify-content: center + overflow hidden (flexbox recorta arriba y abajo).
+     Tamaños equilibrados + modal a 100%: contenido completo, SIN scrollbar
+     (overflow hidden — la barra queda desactivada). */
+  .cover-section {
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 1rem;
+    gap: 1.25rem;
+    overflow: hidden;
+  }
+
+  .cover-section .logo {
+    width: 170px;
+  }
+
+  .cover-title {
+    font-size: 2.9rem;
+  }
+
+  .cover-tagline {
+    font-size: 1.05rem;
+  }
+
+  .cover-divider {
+    margin: 1rem 0;
+  }
+
+  .cta-button {
+    padding: 1rem 2.3rem;
+    font-size: 1rem;
+  }
+
+  .footer-min {
+    padding: 0.8rem 1rem 1rem;
+    margin-bottom: 0.5rem;
   }
 }
 

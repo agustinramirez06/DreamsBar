@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dreams Resto Bar - Carta Digital</title>
-      <link rel="icon" href="assets/favicon.ico">
+  <title>Dreams RestoBar - Carta Digital</title>
+      <link rel="icon" href="assets/favicon-16x16.png">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,12 +12,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<div class="loading-spinner" id="loadingSpinner">
-  <div class="spinner"></div>
-  <p>Cargando menú...</p>
-</div>
 
 <body>
+  
+  <div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner"></div>
+    <p>Cargando menú...</p>
+  </div>
 
   <!-- ===== HEADER FIJO ===== -->
   <header class="header">
@@ -25,7 +26,7 @@
       <!-- Logo -->
       <div class="header-logo"> 
         <a href="#page1" onclick="goToPage(1); return false;">    
-        <img src="assets/logo-dreams.png" alt="Logo Dreams Resto Bar" class="logo-img">
+        <img src="assets/dreamsLogo.png" alt="Logo Dreams Resto Bar" class="logo-img">
         </a>
         <span class="logo-text">DREAMS</span>
       </div>
@@ -54,12 +55,12 @@
         <section class="page active" id="page1">
           <div class="cover-section">
            <!-- Logo con entrada animada -->
-  <img src="assets/logo-dreams.png" alt="Logo Dreams Resto Bar" class="logo">
+  <img src="assets/dreamsLogo.png" alt="Logo Dreams Resto Bar" class="logo">
 
   <!-- Encabezado con título y tagline -->
   <div class="cover-header">
     <h1 class="cover-title">DREAMS</h1>
-    <p class="cover-tagline">Resto Bar</p>
+    <p class="cover-tagline">RestoBar</p>
     <div class="cover-divider"></div>
   </div>
 
@@ -146,26 +147,24 @@
           <!-- El JS inyectará aquí los productos de "Menú Infantil" -->
         </section>
       </div>
+    </div>
+
+    <!-- Botones de navegación (FUERA del contenedor 3D del menú) -->
+    <div class="bottom-navigation">
       
-      <!-- Botones de navegación -->
-      <div class="bottom-navigation">
-        
-        <button class="nav-btn left-btn" id="prevPage">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <button class="nav-btn right-btn" id="nextPage">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-        
-      </div>
+      <button type="button" class="nav-btn left-btn" id="prevPage">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button type="button" class="nav-btn right-btn" id="nextPage">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
       
-      <!-- Indicador de páginas -->
-      <div class="page-indicator" id="pageIndicator"></div>
-      
-    </main>
+    </div>
     
-<!-- Fin Contenedor Menu -->
-  </div>
+    <!-- Indicador de páginas -->
+    <div class="page-indicator" id="pageIndicator"></div>
+    
+  </main>
 
 
 <footer class="footer-min">

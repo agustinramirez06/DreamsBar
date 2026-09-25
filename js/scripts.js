@@ -63,16 +63,26 @@ async function loadMenuFromSheets() {
   try {
     console.log('📥 Cargando menú desde Google Sheets...');
 
-    const response = await fetch(CSV_URL);
+    // Timeout de 15s: evita que el spinner quede infinito en redes lentas
+    const response = await fetch(CSV_URL, { signal: AbortSignal.timeout(15000) });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const csvText = await response.text();
     const menuData = parseCSV(csvText);
+
+    if (!menuData || Object.keys(menuData).length === 0) {
+      throw new Error('El CSV no contiene productos válidos');
+    }
 
     console.log('✅ Menú cargado:', menuData);
     return menuData;
 
   } catch (error) {
     console.error('❌ Error al cargar menú:', error);
-    return getExampleData();
+    return null; // NUNCA devolver datos inventados: el menú real no se falsifica
   }
 }
 
@@ -412,9 +422,16 @@ async function updateMenuPages() {
 
   const menuData = await loadMenuFromSheets();
 
-  // ✅ VALIDAR DATOS
+  // ❌ SIN DATOS: nunca mostrar datos inventados
   if (!menuData || typeof menuData !== 'object' || Object.keys(menuData).length === 0) {
     console.error('❌ No hay datos para renderizar');
+
+    // Si ya hay un menú real cargado, se conserva (transparencia: no inventar precios).
+    // Si no hay nada (primer arranque), mostramos un error visible.
+    const activePage = document.getElementById(`page${currentPage}`);
+    if (!activePage || activePage.children.length === 0) {
+      renderMenuError('No se pudo cargar el menú. Revisá la conexión o la hoja de Google Sheets.');
+    }
     return;
   }
 
@@ -490,34 +507,39 @@ async function updateMenuPages() {
   console.log('✅ Menú actualizado correctamente');
 }
 
-// ===== DATOS DE EJEMPLO (FALLBACK) =====
-function getExampleData() {
-  return {
-    'Entradas': [
-      { id: 1, categoria: 'Entradas', nombre: 'Bastones de Pollo', precio: 5000, descripcion: '' },
-      { id: 2, categoria: 'Entradas', nombre: 'Nuggets', precio: 5000, descripcion: '' }
-    ]
-  };
+// ===== MENSAJE DE ERROR DE CARGA (NUNCA mostrar datos inventados) =====
+function renderMenuError(message) {
+  const page = document.getElementById(`page${currentPage}`);
+  if (!page) return;
+  page.innerHTML = `
+    <div class="menu-error">
+      <div class="menu-error-icon">⚠️</div>
+      <p>${message}</p>
+      <p class="menu-error-hint">La carta se actualiza automáticamente cada 2 minutos.</p>
+    </div>
+  `;
 }
 
 
 
 
-
 // ===== NAVEGACIÓN =====
-// ===== FUNCIÓN PARA MOSTRAR/OCULTAR BOTONES E INDICADOR =====
+// ===== FUNCIÓN PARA MOSTRAR/OCULTAR BOTONES, INDICADOR Y FOOTER =====
 function toggleNavigationUI() {
   const bottomNav = document.querySelector('.bottom-navigation');
   const pageIndicator = document.getElementById('pageIndicator');
+  const footer = document.querySelector('.footer-min');
   
   if (currentPage === 1) {
-    // Ocultar en portada
+    // Portada: ocultar botones e indicador, mostrar footer con el contacto
     if (bottomNav) bottomNav.style.display = 'none';
     if (pageIndicator) pageIndicator.style.display = 'none';
+    if (footer) footer.style.display = 'flex';
   } else {
-    // Mostrar en otras páginas
+    // Otras páginas: mostrar botones e indicador, ocultar footer
     if (bottomNav) bottomNav.style.display = 'flex';
     if (pageIndicator) pageIndicator.style.display = 'flex';
+    if (footer) footer.style.display = 'none';
   }
 }
 
@@ -527,8 +549,7 @@ function createPageIndicators() {
   for (let i = 1; i <= totalPages; i++) {
     const dot = document.createElement('div');
     dot.className = 'page-dot' + (i === 1 ? ' active' : '');
-    dot.addEventListener('click', () => goToPage(i));
-    indicator.appendChild(dot);
+    indicator.appendChild(dot); // SOLO indicador visual, sin interacción
   }
 }
 

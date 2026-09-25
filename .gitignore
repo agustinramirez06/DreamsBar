@@ -1,0 +1,10 @@
+# Engram / Gentle AI internal artifacts
+.atl/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor folders
+.idea/
+.vscode/
