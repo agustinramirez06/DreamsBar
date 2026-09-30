@@ -20,10 +20,8 @@
     <p>Cargando menú...</p>
   </div>
 
-  <!-- ===== HEADER FIJO ===== -->
   <header class="header">
     <div class="header-content">
-      <!-- Logo -->
       <div class="header-logo"> 
         <a href="#page1" onclick="goToPage(1); return false;">    
         <img src="assets/dreamsLogo.png" alt="Logo Dreams Resto Bar" class="logo-img">
@@ -31,7 +29,6 @@
         <span class="logo-text">DREAMS</span>
       </div>
 
-      <!-- Contacto rápido -->
       <div class="header-contact">
         <a href="https://wa.me/5492241586410" target="_blank" rel="noopener noreferrer" class="contact-link" title="WhatsApp">
           <i class="fab fa-whatsapp"></i>
@@ -46,25 +43,20 @@
     </div>
   </header>
 
-  <!-- ===== CONTENEDOR PRINCIPAL (MENÚ) ===== -->
   <main class="main-content">
     <div class="menu-book">
 
       <div class="pages">
-        <!-- Página 1: Portada -->
         <section class="page active" id="page1">
           <div class="cover-section">
-           <!-- Logo con entrada animada -->
   <img src="assets/dreamsLogo.png" alt="Logo Dreams Resto Bar" class="logo">
 
-  <!-- Encabezado con título y tagline -->
   <div class="cover-header">
     <h1 class="cover-title">DREAMS</h1>
     <p class="cover-tagline">RestoBar</p>
     <div class="cover-divider"></div>
   </div>
 
-  <!-- Botón CTA principal -->
   <button class="cta-button" onclick="changePage(1)">
     <span>Ver Carta Digital</span>
     <i class="fa-solid fa-arrow-right"></i>
@@ -72,84 +64,57 @@
 
         </section>
 
-        <!-- Página 2: Entradas -->
         <section class="page" id="page2">
-          <!-- inject de js-->
         </section>
 
-        <!-- Página 3: Platos Principales -->
         <section class="page" id="page3">
-        <!-- inject de js-->
         </section>
 
-        <!-- Página 4: Pastas y Salsas -->
         <section class="page" id="page4">
-          <!-- El JS inyectará aquí los productos de "Pastas" y "Salsas" -->
         </section>
         
-        <!-- Página 5: Guarniciones -->
         <section class="page" id="page5">
-          <!-- El JS inyectará aquí los productos de "Guarniciones" -->
         </section>
 
-        <!-- Página 6: Empanadas -->
         <section class="page" id="page6">
-          <!-- El JS inyectará aquí los productos de "Empanadas" -->
         </section>
 
-        <!-- Página 7: Pizzas -->
         <section class="page" id="page7">
-          <!-- El JS inyectará aquí los productos de "Pizzas" -->
         </section>
 
-        <!-- Página 8: Tartas -->
         <section class="page" id="page8">
-          <!-- El JS inyectará aquí los productos de "Tartas" -->
         </section>
 
-        <!-- Página 9: Hamburguesas -->
         <section class="page" id="page9">
-          <!-- El JS inyectará aquí los productos de "Hamburguesas" -->
         </section>
 
-        <!-- Página 10: Sándwiches -->
         <section class="page" id="page10">
-          <!-- El JS inyectará aquí los productos de "Sándwiches" -->
         </section>
 
-        <!-- Página 11: Postres y Helados -->
         <section class="page" id="page11">
-          <!-- El JS inyectará aquí los productos de "Postres" y "Helados" -->
         </section>
 
-        <!-- Página 12: Bebida Sin Alcohol -->
         <section class="page" id="page12">
-          <!-- El JS inyectará aquí los productos de "Bebida Sin Alcohol" -->
         </section>
 
-        <!-- Página 13: Vinos -->
         <section class="page" id="page13">
-          <!-- El JS inyectará aquí los productos de "Vinos" -->
         </section>
 
-        <!-- Página 14: Cervezas -->
         <section class="page" id="page14">
-          <!-- El JS inyectará aquí los productos de "Cervezas" -->
         </section>
 
-        <!-- Página 15: Tragos -->
         <section class="page" id="page15">
-          <!-- El JS inyectará aquí los productos de "Tragos" -->
         </section>
 
-        <!-- Página 16: Menú Infantil -->
         <section class="page" id="page16">
-          <!-- El JS inyectará aquí los productos de "Menú Infantil" -->
+        </section>
+
+        <section class="page" id="page17">
         </section>
       </div>
     </div>
 
-    <!-- Botones de navegación (FUERA del contenedor 3D del menú) -->
+<!-- Fuera del contenedor 3D a propósito: los botones flotantes no pueden entrar en .pages -->
     <div class="bottom-navigation">
       
       <button type="button" class="nav-btn left-btn" id="prevPage">
@@ -161,7 +126,6 @@
       
     </div>
     
-    <!-- Indicador de páginas -->
     <div class="page-indicator" id="pageIndicator"></div>
     
   </main>

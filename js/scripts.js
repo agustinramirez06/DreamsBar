@@ -1,8 +1,6 @@
-// ===== CONFIGURACIÓN =====
 let currentPage = 1;
-const totalPages = 16;
+const totalPages = 17;
 
-// 🔧 URL DEL CSV
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvEfoAlfrXcSukJICzx9icJU9VWMQI4gHnAjNIV9Y28KtBCWo89XJabccW9b2NljJZRiWJ4cP0aAJh/pub?output=csv';
 
 const EMOJI_MAP = {
@@ -23,10 +21,10 @@ const EMOJI_MAP = {
   'Vinos': '🍷',
   'Cervezas': '🍺',
   'Tragos': '🍹',
-  'Menú Infantil': '👶'
+  'Menú Infantil': '👶',
+  'Asado Libre': '🥩🥗🔥'
 };
 
-// 🔧 MAPEO DE CATEGORÍAS A PÁGINAS (CENTRALIZADO)
 const CATEGORY_MAP = {
   'Entradas': 'page2',
   'Principales': 'page3',
@@ -38,32 +36,38 @@ const CATEGORY_MAP = {
   'Tartas': 'page8',
   'Hamburguesas': 'page9',
   'Sándwiches': 'page10',
-  'Postres': 'page11',
-  'Helados': 'page11',
+  'Menú Infantil': 'page11',
+  'Infantil': 'page11',
   'Bebida Sin Alcohol': 'page12',
   'Alcohol': 'page12',
   'Vinos': 'page13',
   'Cervezas': 'page14',
   'Tragos': 'page15',
-  'Menú Infantil': 'page16',
-  'Infantil': 'page16'
+  'Postres': 'page16',
+  'Helados': 'page16',
+  'Asado Libre': 'page17'
 };
 
-function getEmojiForCategory(categoryName) {
-  return EMOJI_MAP[categoryName] || '🥪'; // Default emoji si no encuentra
+// "_config" es un token reservado: no es una categoría de productos, es configuración del sitio
+const CONFIG_CATEGORY = '_config';
+
+let menuConfig = [];
+
+function normalizeCategoryKey(name) {
+  return name.trim().toLowerCase();
 }
 
+function getEmojiForCategory(categoryName) {
+  return EMOJI_MAP[categoryName] || '🥪';
+}
 
-
-// 🔧 CATEGORÍAS QUE NECESITAN AGRUPACIÓN POR TIPO
 const GROUPED_CATEGORIES = ['Hamburguesas', 'Vinos'];
 
-// ===== CARGAR DATOS DESDE GOOGLE SHEETS =====
 async function loadMenuFromSheets() {
   try {
     console.log('📥 Cargando menú desde Google Sheets...');
 
-    // Timeout de 15s: evita que el spinner quede infinito en redes lentas
+    // sin esto un fetch colgado deja el spinner tapando la pantalla para siempre
     const response = await fetch(CSV_URL, { signal: AbortSignal.timeout(15000) });
 
     if (!response.ok) {
@@ -82,14 +86,15 @@ async function loadMenuFromSheets() {
 
   } catch (error) {
     console.error('❌ Error al cargar menú:', error);
-    return null; // NUNCA devolver datos inventados: el menú real no se falsifica
+    return null; // null, no un objeto vacío: el menú real nunca se sustituye por datos inventados
   }
 }
 
-// ===== CONVERTIR CSV A JAVASCRIPT (PARSER ROBUSTO) =====
 function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   const menuItems = [];
+
+  menuConfig = [];
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
@@ -127,7 +132,22 @@ function parseCSV(csvText) {
     const precioRaw = columns[4];
     const precio = parseInt(precioRaw, 10);
 
-    // ✅ VALIDACIÓN MEJORADA
+    // Orden obligatorio: antes de la validación genérica y de organizeByCategory, o una
+    // fila _config se convierte en un producto más de la carta.
+    if (normalizeCategoryKey(categoria || '') === CONFIG_CATEGORY) {
+      if (!nombre || isNaN(precio) || precio === 0) {
+        console.warn(`⚠️ Fila ${i + 1} de configuración "${CONFIG_CATEGORY}" descartada: ` +
+          'se necesita "nombre" (la etiqueta) y un "precio" numérico mayor que 0.', {
+            nombre: nombre || '(vacío)',
+            precio: precioRaw || '(vacío)',
+            raw: columns
+          });
+      } else {
+        menuConfig.push({ label: nombre, precio });
+      }
+      continue;
+    }
+
     if (!nombre || !categoria || isNaN(precio) || precio === 0) {
       console.warn(`⚠️ Fila ${i + 1} ignorada:`, {
         nombre: nombre || '(vacío)',
@@ -151,7 +171,6 @@ function parseCSV(csvText) {
   return organizeByCategory(menuItems);
 }
 
-// ===== ORGANIZAR POR CATEGORÍA =====
 function organizeByCategory(items) {
   const categories = {};
 
@@ -165,14 +184,11 @@ function organizeByCategory(items) {
   return categories;
 }
 
-// ===== FORMATEAR PRECIO =====
 function formatPrice(price) {
   return `$${price.toLocaleString('es-AR')}`;
 }
 
-// ===== DETECTAR TIPO DE ITEM (Simple, Doble, etc.) =====
 function detectItemType(nombre, descripcion) {
-  // Primero buscamos en el nombre (donde está el tipo en hamburguesas)
   let busqueda = (nombre + ' ' + descripcion).toLowerCase();
   
   if (busqueda.includes('x1')) return 'Simple';
@@ -184,7 +200,6 @@ function detectItemType(nombre, descripcion) {
   return 'Otros';
 }
 
-// ===== AGRUPAR ITEMS POR TIPO =====
 function groupItemsByType(items) {
   const groups = {};
 
@@ -199,7 +214,6 @@ function groupItemsByType(items) {
   return groups;
 }
 
-// ===== DISEÑO ESPECIAL PARA BEBIDAS =====
 function renderBebidaSpecial(items) {
   const bebidas = {};
 
@@ -237,7 +251,6 @@ function renderBebidaSpecial(items) {
   return html;
 }
 
-// ===== DISEÑO ESPECIAL PARA EMPANADAS =====
 function renderEmpanadaSpecial(items) {
   let variedades = '';
   let precios = [];
@@ -291,11 +304,9 @@ function renderEmpanadaSpecial(items) {
   return html;
 }
 
-// ===== RENDERIZAR ITEMS AGRUPADOS POR TIPO (Hamburguesas, Vinos, etc.) =====
 function renderGroupedItems(groupedByType) {
   let html = '';
 
-  // Orden preferido de tipos
   const typeOrder = ['Simple', 'Doble', 'Triple', 'Tinto', 'Blanco', 'Rosado', 'Espumante', 'Otros'];
 
   const sortedTypes = Object.keys(groupedByType).sort((a, b) => {
@@ -312,7 +323,6 @@ function renderGroupedItems(groupedByType) {
     html += `<ul class="menu-items">`;
 
     items.forEach(item => {
-      // Extraer solo la descripción real (sin el tipo Simple/Doble)
       let descReal = item.nombre;
       const typeInName = detectItemType(item.nombre, '');
       if (typeInName !== 'Otros') {
@@ -337,9 +347,7 @@ function renderGroupedItems(groupedByType) {
   return html;
 }
 
-// ===== CREAR ELEMENTO DE CATEGORÍA (CON SOPORTE PARA AGRUPACIÓN) =====
 function createCategoryElement(categoryName, items) {
-  // ✅ VALIDAR ITEMS VACÍOS
   if (!items || items.length === 0) {
     const emptyDiv = document.createElement('div');
     emptyDiv.className = 'menu-category empty';
@@ -357,7 +365,6 @@ function createCategoryElement(categoryName, items) {
   categoryTitle.textContent = categoryName;
   categoryDiv.appendChild(categoryTitle);
 
-  // ✅ DETECTAR TIPO DE RENDERIZADO
   const lowerName = categoryName.toLowerCase();
 
   if (lowerName.includes('empanada')) {
@@ -374,14 +381,12 @@ function createCategoryElement(categoryName, items) {
     return categoryDiv;
   }
 
-  // ✅ RENDERIZAR CON AGRUPACIÓN POR TIPO (Hamburguesas, Vinos)
   if (GROUPED_CATEGORIES.some(cat => lowerName.includes(cat.toLowerCase()))) {
     const groupedByType = groupItemsByType(items);
     categoryDiv.insertAdjacentHTML('beforeend', renderGroupedItems(groupedByType));
     return categoryDiv;
   }
 
-  // ===== DISEÑO NORMAL =====
   const itemsList = document.createElement('ul');
   itemsList.className = 'menu-items';
 
@@ -416,18 +421,41 @@ function createCategoryElement(categoryName, items) {
   return categoryDiv;
 }
 
-// ===== ACTUALIZAR MENÚ (UN SOLO TÍTULO POR PÁGINA, AGRUPA SECCIONES) =====
+// Tiene que re-renderizarse en cada refresco: updateMenuPages vacía las páginas cada
+// 2 minutos, así que HTML estático dentro de una página no sobrevive ni un tick.
+function renderConfigNote() {
+  if (!menuConfig.length) return;
+
+  // page1 queda afuera: ahí el footer flotante está visible y la nota lo pisaría
+  for (let i = 2; i <= totalPages; i++) {
+    const page = document.getElementById(`page${i}`);
+    if (!page) continue;
+
+    const note = document.createElement('div');
+    note.className = 'delivery-note';
+
+    // sin sort: el orden es el de las filas de la hoja
+    menuConfig.forEach(cfg => {
+      const line = document.createElement('p');
+      line.className = 'delivery-note-line';
+      line.textContent = `${cfg.label} ${formatPrice(cfg.precio)}`;
+      note.appendChild(line);
+    });
+
+    page.appendChild(note);
+  }
+}
+
 async function updateMenuPages() {
   console.log('🔄 Actualizando páginas del menú...');
 
   const menuData = await loadMenuFromSheets();
 
-  // ❌ SIN DATOS: nunca mostrar datos inventados
   if (!menuData || typeof menuData !== 'object' || Object.keys(menuData).length === 0) {
     console.error('❌ No hay datos para renderizar');
 
-    // Si ya hay un menú real cargado, se conserva (transparencia: no inventar precios).
-    // Si no hay nada (primer arranque), mostramos un error visible.
+    // con un menú ya cargado se conserva; el error visible solo va en el primer arranque,
+    // cuando la página activa todavía está vacía.
     const activePage = document.getElementById(`page${currentPage}`);
     if (!activePage || activePage.children.length === 0) {
       renderMenuError('No se pudo cargar el menú. Revisá la conexión o la hoja de Google Sheets.');
@@ -435,19 +463,16 @@ async function updateMenuPages() {
     return;
   }
 
-  // ✅ LIMPIAR TODAS LAS PÁGINAS PRIMERO
   for (let i = 2; i <= totalPages; i++) {
     const page = document.getElementById(`page${i}`);
     if (page) page.innerHTML = '';
   }
 
-  // ===== AGRUPAR CATEGORÍAS POR PÁGINA =====
   const groupedPages = {};
 
   Object.entries(menuData).forEach(([categoryName, items]) => {
-    const normalized = categoryName.trim().toLowerCase();
+    const normalized = normalizeCategoryKey(categoryName);
 
-    // ✅ BÚSQUEDA MEJORADA: sin depender de mayúsculas
     let pageId = null;
     for (const [key, id] of Object.entries(CATEGORY_MAP)) {
       if (key.toLowerCase() === normalized) {
@@ -468,19 +493,16 @@ async function updateMenuPages() {
     groupedPages[pageId].push({ name: categoryName, items });
   });
 
-  // ===== RENDERIZAR PÁGINAS CON UN SOLO TÍTULO =====
   Object.entries(groupedPages).forEach(([pageId, groups]) => {
     const page = document.getElementById(pageId);
     if (!page) return;
 
-    // ✅ CREAR WRAPPER CON UN ÚNICO TÍTULO POR PÁGINA
     const wrapper = document.createElement('div');
     wrapper.className = 'menu-section-wrapper';
 
     const mainTitle = document.createElement('h1');
     mainTitle.className = 'menu-title';
 
-    // ✅ CONSTRUCCIÓN DINÁMMICA DEL TÍTULO
     const categoriesText = groups
       .map(g => g.name)
       .join(' / ');
@@ -489,9 +511,7 @@ async function updateMenuPages() {
     mainTitle.textContent = `${emoji}  ${categoriesText}`;
     wrapper.appendChild(mainTitle);
 
-    // ===== AGREGAR CADA CATEGORÍA COMO SUBCATEGORÍA =====
     groups.forEach(group => {
-      // ✅ VALIDAR ANTES DE RENDERIZAR
       if (!group.items || group.items.length === 0) {
         console.warn(`⚠️ ${group.name} no tiene items`);
         return;
@@ -504,10 +524,12 @@ async function updateMenuPages() {
     page.appendChild(wrapper);
   });
 
+  // después del clear y del render: antes la nota se borraría o quedaría antes del contenido
+  renderConfigNote();
+
   console.log('✅ Menú actualizado correctamente');
 }
 
-// ===== MENSAJE DE ERROR DE CARGA (NUNCA mostrar datos inventados) =====
 function renderMenuError(message) {
   const page = document.getElementById(`page${currentPage}`);
   if (!page) return;
@@ -520,23 +542,16 @@ function renderMenuError(message) {
   `;
 }
 
-
-
-
-// ===== NAVEGACIÓN =====
-// ===== FUNCIÓN PARA MOSTRAR/OCULTAR BOTONES, INDICADOR Y FOOTER =====
 function toggleNavigationUI() {
   const bottomNav = document.querySelector('.bottom-navigation');
   const pageIndicator = document.getElementById('pageIndicator');
   const footer = document.querySelector('.footer-min');
   
   if (currentPage === 1) {
-    // Portada: ocultar botones e indicador, mostrar footer con el contacto
     if (bottomNav) bottomNav.style.display = 'none';
     if (pageIndicator) pageIndicator.style.display = 'none';
     if (footer) footer.style.display = 'flex';
   } else {
-    // Otras páginas: mostrar botones e indicador, ocultar footer
     if (bottomNav) bottomNav.style.display = 'flex';
     if (pageIndicator) pageIndicator.style.display = 'flex';
     if (footer) footer.style.display = 'none';
@@ -549,7 +564,7 @@ function createPageIndicators() {
   for (let i = 1; i <= totalPages; i++) {
     const dot = document.createElement('div');
     dot.className = 'page-dot' + (i === 1 ? ' active' : '');
-    indicator.appendChild(dot); // SOLO indicador visual, sin interacción
+    indicator.appendChild(dot); // sin listener a propósito: es indicación visual, no navegación
   }
 }
 
@@ -574,7 +589,6 @@ function changePage(direction) {
   newPage.classList.add('active');
   updateIndicator();
 
-//ocultar o mostrar botones e indicador
   toggleNavigationUI();
 }
 
@@ -597,7 +611,6 @@ function updateIndicator() {
     dot.classList.toggle('active', index === currentPage - 1);
   });
 
-//ocultar o mostrar botones e indicador
   toggleNavigationUI(); 
 }
 
@@ -607,7 +620,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const spinner = document.getElementById('loadingSpinner');
   createPageIndicators();
 
-  // Ocultar botones
   toggleNavigationUI();
 
   await updateMenuPages();

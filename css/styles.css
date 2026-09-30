@@ -1,17 +1,13 @@
-/* ===== RESET Y BASE ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-
-
 html {
   scroll-behavior: smooth;
 }
 
-/* ===== LAYOUT GRID (Header + Main + Footer) ===== */
 body {
   font-family: 'Montserrat', sans-serif;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
@@ -20,11 +16,10 @@ body {
   grid-template-rows: auto 1fr auto;
   grid-template-columns: 1fr;
   min-height: 100vh; /* fallback: navegadores sin soporte de svh */
-  min-height: 100svh; /* iOS: alto VISIBLE real (sin la barra del navegador) — el menú entra y los puntitos no quedan debajo del pliegue */
+  min-height: 100svh; /* iOS: svh da el alto VISIBLE real, sin la barra del navegador; con vh los puntitos quedan bajo el pliegue */
   overflow-x: hidden;
 }
 
-/* ===== LOADING SPINNER ===== */
 .loading-spinner {
   position: fixed;
   top: 0;
@@ -58,7 +53,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ===== HEADER FIJO ===== */
 .header {
   position: sticky;
   top: 0;
@@ -67,7 +61,7 @@ body {
   backdrop-filter: blur(10px);
   border-bottom: 2px solid rgba(230, 57, 70, 0.35);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  padding: 0.6rem 1rem; /* header más compacto: devuelve altura al modal */
+  padding: 0.6rem 1rem;
 }
 
 .header-content {
@@ -79,7 +73,6 @@ body {
   gap: 2rem;
 }
 
-/* Logo en header */
 .header-logo {
   display: flex;
   align-items: center;
@@ -104,7 +97,6 @@ body {
 }
 
 
-/* Contacto en header */
 .header-contact {
   display: flex;
   align-items: center;
@@ -144,29 +136,25 @@ body {
   display: inline;
 }
 
-
-
-/* ===== MAIN CONTENT ===== */
 .main-content {
-  position: relative; /* ancla para nav e indicador, fuera del árbol 3D */
+  position: relative; /* ancla de .bottom-navigation y .page-indicator: sin esto se posicionan contra el viewport */
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0.6rem 0.5rem 60px; /* restaurado: padding superior para que el menú no crezca más */
+  padding: 0.6rem 0.5rem 60px;
   overflow: hidden;
   flex: 1;
 }
 
-/* ===== MENU BOOK (sin cambios, solo ajusta altura) ===== */
 .menu-book {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 85%; /* ocupa TODO el alto visible del main: sin anidado que achique (los botones están fuera) */
-  max-width: 900px; /* base segura: mobile lo pisa a 95% (media query) y PC a 900px (bloque desktop). Sin esto, ventanas anchas-bajas (teléfono rotado) caían en max-width: 100px (roto) */
+  height: 85%;
+  max-width: 900px;
   aspect-ratio: 16 / 9;
 }
 
@@ -175,7 +163,7 @@ body {
   width: 100%;
   height: 100%;
   max-width: 900px;
-  perspective: 2000px; /* contexto 3D aislado: solo afecta al flip de páginas */
+  perspective: 2000px;
 }
 
 
@@ -208,10 +196,8 @@ body {
   transform: rotateY(180deg) scale(0.8);
 }
 
-/* Las páginas de la carta (2-16) reservan abajo espacio para los botones flotantes.
-   La portada (page1) no lo necesita: ahí los botones están ocultos.
-   La portada tampoco reserva padding inferior: su contenido está anclado arriba
-   (flex-start) y el aire sobrante deja el CTA por encima del footer flotante. */
+/* Los 6rem de abajo son para los botones flotantes, que en la portada están ocultos:
+   aplicarlos también ahí dejaría el CTA pegado al footer fijo. */
 .page:not(#page1) {
   padding-bottom: 6rem;
 }
@@ -234,21 +220,20 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* ===== BOTONES DE NAVEGACIÓN (DEBAJO DE LA CARTA) ===== */
 .bottom-navigation {
   position: absolute;
-  bottom: 40px; /* anclado al MAIN, fuera del contenedor 3D — posición aprobada */
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10rem; /* espacio entre botones (restaurado a versión aprobada) */
+  gap: 10rem;
   z-index: 1000;
 }
 
 .nav-btn {
-  position: static; /* ya no absolute */
+  position: static;
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -278,10 +263,6 @@ body {
   transform: scale(0.95);
 }
 
-
-
-
-/* ===== PÁGINA DE PORTADA ===== */
 .cover-section {
   display: flex;
   flex-direction: column;
@@ -348,7 +329,6 @@ body {
   font-size: 1.2rem;
 }
 
-/* ===== CONTENIDO DEL MENÚ (existente) ===== */
 .menu-section-wrapper {
   animation: fadeIn 0.6s ease;
 }
@@ -462,10 +442,31 @@ body {
   padding-top: 0.1rem;
 }
 
-/* ===== INDICADOR DE PÁGINAS ===== */
+/* Nunca fixed ni sticky: escaparían del scroll de .page y taparían los botones
+   flotantes que .page:not(#page1) deja libres con su padding-bottom. */
+.delivery-note {
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(230, 57, 70, 0.25);
+  text-align: center;
+}
+
+.delivery-note-line {
+  margin: 0; /* <p> trae margin: 1em 0 del navegador: el espaciado lo manda la regla siguiente */
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #bbb;
+  letter-spacing: 1px;
+  overflow-wrap: break-word; /* texto largo no rompe la carta en 320px */
+}
+
+.delivery-note-line + .delivery-note-line {
+  margin-top: 0.4rem;
+}
+
 .page-indicator {
   position: absolute;
-  bottom: 15px; /* justo debajo de los botones — posición aprobada */
+  bottom: 15px; /* debajo de los botones flotantes (bottom: 40px): más arriba los tapa */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -487,7 +488,6 @@ body {
   border-radius: 5px;
 }
 
-/* ===== ERROR DE CARGA DEL MENÚ (sin datos inventados) ===== */
 .menu-error {
   display: flex;
   flex-direction: column;
@@ -512,14 +512,14 @@ body {
 }
 
 .footer-min {
-  position: fixed; /* flotante: NO consume la fila del grid → el modal de la portada usa todo el alto, igual que el menú */
+  position: fixed; /* flotante: como fila del grid consumía alto y el modal de la portada dejaba de entrar */
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000; /* por encima del modal (z-index 10) para flotar sobre su borde inferior */
+  z-index: 1000; /* tiene que superar el z-index 10 de .page.active o queda detrás de la carta */
   text-align: center;
-  margin-bottom: 1.5rem; /* separación desde el borde inferior (lo sube) — 24px */
-  padding: 0.6rem 0.8rem calc(0.6rem + env(safe-area-inset-bottom, 0px)); /* footer compacto: devuelve altura al modal */
+  margin-bottom: 1.5rem; /* en un fixed con bottom: 0 esto lo sube, no lo baja */
+  padding: 0.6rem 0.8rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -529,7 +529,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem; /* gap compacto: más espacio para el modal */
+  gap: 0.5rem;
   max-width: 100%;
 }
 
@@ -575,7 +575,6 @@ body {
   transform: translateY(-1px) scale(1);
 }
 
-/* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 640px) {
   .header-content {
     gap: 1rem;
@@ -596,7 +595,7 @@ body {
   }
 
   .main-content {
-    padding: 0.6rem 0.3rem 60px; /* restaurado: padding superior en mobile */
+    padding: 0.6rem 0.3rem 60px;
     flex: 1;
   }
 
@@ -648,9 +647,19 @@ body {
     min-width: 65px;
   }
 
+  .delivery-note {
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+  }
+
+  .delivery-note-line {
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+  }
+
  .footer-min {
-    margin-bottom: 1.5rem; /* más arriba también en mobile — 24px */
-    padding: 0.6rem 0.5rem calc(0.6rem + env(safe-area-inset-bottom, 0px)); /* compacto en mobile */
+    margin-bottom: 1.5rem;
+    padding: 0.6rem 0.5rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
   }
 
   .footer-content {
@@ -673,7 +682,6 @@ body {
 
 }
 
-/* ===== DISEÑO ESPECIAL PARA EMPANADAS ===== */
 .empanada-special {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
@@ -738,7 +746,6 @@ body {
   font-weight: 700;
 }
 
-/* ===== BEBIDAS ESPECIALES ===== */
 .bebida-items .bebida-item {
   display: block;
   padding: 0.8rem;
@@ -760,7 +767,6 @@ body {
   border: 1px solid rgba(230, 57, 70, 0.3);
 }
 
-/* ===== SUBSECCIONES (Simple, Doble, Tinto, Blanco) ===== */
 .menu-subtype {
   margin-bottom: 1.2rem;
   padding-left: 1.2rem;
@@ -778,16 +784,13 @@ body {
   font-style: italic;
 }
 
-/* ===== PORTADA PREMIUM ===== */
 
-/* Fondo animado con gradiente dinámico */
 .cover-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Anclado arriba, NO centrado: si el contenido excede (footer flotante abajo),
-     el centrado flexbox cortaría el logo arriba. Con flex-start el logo nunca se corta
-     y el aire inferior separa el CTA del footer flotante. */
+  /* Anclado arriba, NO centrado: al centrar, flexbox recorta por los dos extremos
+     y con el footer flotante abajo el logo se perdía arriba. */
   justify-content: flex-start;
   height: 100%;
   text-align: center;
@@ -797,7 +800,6 @@ body {
   padding-top: 1.5rem;
 }
 
-/* Fondo con efecto "respira" sutil */
 .cover-section::before {
   content: '';
   position: absolute;
@@ -822,7 +824,6 @@ body {
   }
 }
 
-/* Contenedor con z-index para que se vea sobre el fondo animado */
 .cover-content {
   position: relative;
   z-index: 1;
@@ -835,7 +836,6 @@ body {
   max-width: 600px;
 }
 
-/* Logo con entrada elegante */
 .logo {
   width: 180px;
   filter: drop-shadow(0 15px 40px rgba(230, 57, 70, 0.25));
@@ -851,13 +851,11 @@ body {
   }
 }
 
-/* Contenedor de texto principal */
 .cover-header {
   animation: fadeInUp 1s ease 0.3s forwards;
   opacity: 0;
 }
 
-/* Título principal */
 .cover-title {
   font-family: 'Playfair Display', serif;
   font-size: 3rem;
@@ -869,7 +867,6 @@ body {
   line-height: 1.1;
 }
 
-/* Tagline elegante */
 .cover-tagline {
   font-size: 1.1rem;
   font-weight: 300;
@@ -879,7 +876,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Línea divisoria sutil */
 .cover-divider {
   width: 60px;
   height: 2px;
@@ -897,7 +893,6 @@ body {
   }
 }
 
-/* Botón CTA principal */
 .cta-button {
   cursor: pointer;
   touch-action: manipulation;
@@ -943,7 +938,6 @@ body {
   transform: translateX(4px);
 }
 
-/* Contacto discreto al fondo */
 .cover-footer {
   position: absolute;
   bottom: 30px;
@@ -982,14 +976,12 @@ body {
   display: none;
 }
 
-/* En pantallas medianas, mostrar texto */
 @media (min-width: 600px) {
   .cover-contact-item span {
     display: inline;
   }
 }
 
-/* Indicador de scroll/navegación */
 .cover-indicator {
   position: absolute;
   bottom: 80px;
@@ -1024,7 +1016,6 @@ body {
   50% { transform: translateY(-6px); }
 }
 
-/* Animación general de entrada */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -1036,7 +1027,6 @@ body {
   }
 }
 
-/* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 640px) {
   .logo {
     width: 140px;
@@ -1072,29 +1062,22 @@ body {
   }
 }
 
-/* ===== PC / DESKTOP (≥641px y alto ≥500px) =====
-   Bloque ADITIVO: solo aplica a pantallas ANCHAS Y ALTAS (PC).
-   El mobile portrait (max-width: 640px) y el teléfono rotado (alto < 500px)
-   NO reciben ninguna regla de este bloque.
-   Corrige el max-width: 100px del .menu-book, que solo rompía el desktop. */
+/* El min-height es lo que deja fuera al teléfono rotado (ancho pero bajo):
+   ese caso sigue con las reglas base. */
 @media (min-width: 641px) and (min-height: 500px) {
   .main-content {
     padding: 1rem 1.5rem 60px;
   }
 
   .menu-book {
-    height: 100%; /* en PC ocupa todo el alto del main (la base 85% era para mobile) */
-    max-width: 900px; /* corrige el max-width: 100px de la regla base (bug de desktop) */
+    height: 100%;
+    max-width: 900px;
   }
 
   .page {
     padding: 1.25rem;
   }
 
-  /* Portada en PC: anclada arriba (igual que mobile).
-     NO justify-content: center + overflow hidden (flexbox recorta arriba y abajo).
-     Tamaños equilibrados + modal a 100%: contenido completo, SIN scrollbar
-     (overflow hidden — la barra queda desactivada). */
   .cover-section {
     justify-content: flex-start;
     align-items: center;
